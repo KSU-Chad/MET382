@@ -53,10 +53,7 @@ float s = 0.0;
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
-AsyncEventSource events("/events");
 
-// Generally, you should use "unsigned long" for variables that hold time
-// The value will quickly become too large for an int to store
 unsigned long previousMillis = 0;    // will store last time DHT was updated
 
 // Updates DHT readings every 10 seconds
@@ -97,7 +94,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <h4> HUMIDITY</h4><p><span class="reading"><span id="humidity">%HUMIDITY%</span> &percnt;</span></p>
       </div>
       <div class="card resistance">
-        <h4> RESISTANCE</h4><p><span class="reading"><span id="resistance">%RESISTANCE%</span> K&ohm;</span></p>
+        <h4> RESISTANCE</h4><p><span class="reading"><span id="resistance">%RESISTANCE%</span> &ohm;</span></p>
       </div>
       <div class="card thermistor">
         <h4> THERMISTOR TEMPERATURE</h4><p><span class="reading"><span id="thermistor">%THERMISTOR%</span> &deg;C</span></p>
@@ -205,18 +202,7 @@ void setup() {
   server.on("/thermistor", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", String(s).c_str());
   });
-  // Handle Web Server Events
-//  events.onConnect([](AsyncEventSourceClient *client){
-//    if(client->lastId()){
-//      Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
-//    }
-//    // send event with message "hello!", id current millis
-//    // and set reconnect delay to 1 second
-//    client->send("hello!", NULL, millis(), 1000);
-//  });
   server.addHandler(&events);
-  
-  // Start server
   server.begin();
 }
 
@@ -252,10 +238,9 @@ void loop() {
     Serial.print("Analog reading ");
     Serial.println(reading);
     // convert the value to resistance
-    //    reading = (SERIESRESISTOR*reading)/(1023 - reading) ;
     reading = (1023 / reading - 1) ;   // (1023/ADC - 1)
     reading = SERIESRESISTOR / reading;  // 10K / (1023/ADC - 1)
-    r = reading/1000;
+    r = reading;
     Serial.print("Thermistor resistance ");
     Serial.println(reading);
 
@@ -270,12 +255,5 @@ void loop() {
     Serial.print("Temperature ");
     Serial.print(steinhart);
     Serial.println(" °C");
-
-     // Send Events to the Web Server with the Sensor Readings
-//    events.send("ping",NULL,millis());
-//    events.send(String(t).c_str(),"temperature",millis());
-//    events.send(String(h).c_str(),"humidity",millis());
-//    events.send(String(r).c_str(),"resistance",millis());
-//    events.send(String(s).c_str(),"thermistor",millis());
   }
 }
