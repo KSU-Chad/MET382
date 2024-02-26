@@ -35,6 +35,7 @@ const char* password = "12345678";
 #define THERMISTORNOMINAL **** // nominal resistance at 25 °C
 #define BCOEFFICIENT **** // The beta coefficient of the thermistor (usually 3000-4000)
 #define SERIESRESISTOR **** // the value of the 'other' voltage deivider resistor
+#define RESOLUTION ****  // ESP8266 ADC resolution (2^n-1)
 //***********************************
 
 #define DHTPIN 5     // Digital pin connected to the DHT sensor
@@ -238,7 +239,7 @@ void loop() {
     Serial.print("Analog reading ");
     Serial.println(reading);
     // convert the value to resistance
-    reading = (1023 / reading - 1) ;   // (1023/ADC - 1)
+    reading = (RESOLUTION / reading - 1) ;   // (1023/ADC - 1)
     reading = SERIESRESISTOR / reading;  // 10K / (1023/ADC - 1)
     r = reading;
     Serial.print("Thermistor resistance ");
